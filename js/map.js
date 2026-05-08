@@ -146,43 +146,28 @@ function onEachFeature(feature, layer, decisionsByAddress) {
 }
 
 function getFeatureAddress(props) {
-  return (
-    props["Повна адреса"] ||
-    props["attr_Повна адреса"] ||
-    props["Адреса"] ||
-    [props["attr_Тип ВДМ"], props["attr_Вулиця"], props["attr_Номер будинку"]].filter(Boolean).join(" ") ||
-    ""
-  );
+  return props["Повна адреса"] || "";
 }
 
 function buildPopupHtml(feature, decisionsByAddress) {
   const props = feature.properties || {};
-
   const fullAddress = getFeatureAddress(props);
-  const title = escapeHtml(fullAddress || props.attr_Title || `Object ${props.ID || ""}`.trim() || "Об’єкт");
-  const description = props.attr_Text ? `<p class="popup__text">${escapeHtml(props.attr_Text)}</p>` : "";
-
-  const addressHtml = fullAddress
-    ? `<p><strong>Адреса:</strong> ${escapeHtml(fullAddress)}</p>`
+  
+  if (!fullAddress) {
+    return `<div class="popup"><p>Немає інформації про об’єкт</p></div>`;
+  }
+  
+  const coordsHtml = props.Latitude && props.Longitude
+    ? `<p class="popup__coords"><strong>Координати:</strong> ${escapeHtml(String(props.Latitude).substring(0, 10))}, ${escapeHtml(String(props.Longitude).substring(0, 10))}</p>`
     : "";
-
-  const typeHtml = props["attr_Вид"] ? `<p><strong>Type:</strong> ${escapeHtml(props["attr_Вид"])}</p>` : "";
-  const coordsHtml = props.Latitude && props.Longitude ? `<p><strong>Координати:</strong> ${escapeHtml(String(props.Latitude))}, ${escapeHtml(String(props.Longitude))}</p>` : "";
-
+  
   const decisionHtml = buildDecisionsHtml(props, decisionsByAddress);
-
-  const sourceUrl = safeUrl(props.attr_Source);
-  const sourceHtml = sourceUrl ? `<p><a href="${sourceUrl}" target="_blank" rel="noopener">Source</a></p>` : "";
-
+  
   return `
     <div class="popup">
-      <h3>${title}</h3>
-      ${typeHtml}
-      ${addressHtml}
+      <h3 class="popup__title">🏢 ${escapeHtml(fullAddress)}</h3>
       ${coordsHtml}
       ${decisionHtml}
-      ${description}
-      ${sourceHtml}
     </div>
   `;
 }
@@ -190,24 +175,25 @@ function buildPopupHtml(feature, decisionsByAddress) {
 function buildDecisionsHtml(props, decisionsByAddress) {
   const address = getFeatureAddress(props);
   const decisions = decisionsByAddress.get(normalizeAddress(address));
+  
   if (!decisions || decisions.length === 0) {
-    return `<p><strong>Рішення за адресою:</strong> не знайдено</p>`;
+    return `<div class="popup__decisions"><p class="popup__no-decisions"><strong>📋 Рішення:</strong> не знайдено</p></div>`;
   }
 
   const rows = decisions
     .map((item) => {
-      const decisionText = item.decision ? escapeHtml(item.decision) : "(невідоме рішення)";
-      const decisionLink = safeUrl(item.decision)
-        ? `<a href="${safeUrl(item.decision)}" target="_blank" rel="noopener">${escapeHtml(item.decision)}</a>`
-        : decisionText;
-      return `<li>${escapeHtml(item.date || "")}: ${decisionLink}</li>`;
+      const isUrl = safeUrl(item.decision);
+      const decisionDisplay = isUrl
+        ? `<a href="${isUrl}" target="_blank" rel="noopener" class="popup__decision-link">📄 ${escapeHtml(item.decision)}</a>`
+        : `<span class="popup__decision-text">${escapeHtml(item.decision)}</span>`;
+      return `<li class="popup__decision-item"><span class="popup__date">${escapeHtml(item.date || "—")}:</span> ${decisionDisplay}</li>`;
     })
     .join("");
 
   return `
     <div class="popup__decisions">
-      <p><strong>Рішення за адресою:</strong> ${decisions.length}</p>
-      <ul>${rows}</ul>
+      <p class="popup__decisions-title"><strong>📋 Рішення (${decisions.length}):</strong></p>
+      <ul class="popup__decisions-list">${rows}</ul>
     </div>
   `;
 }
