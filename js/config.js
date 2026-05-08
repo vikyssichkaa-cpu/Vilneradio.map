@@ -1,6 +1,6 @@
 export const MAP_CONFIG = {
   geoJsonPath: "data/Data.geojson",
-  initialCenter: [49.41542035, 26.9841635],
+  initialCenter: [48.4611, 37.0858],
   initialZoom: 13,
   minZoom: 11,
   maxZoom: 20,
