@@ -5,7 +5,7 @@ export const MAP_CONFIG = {
   initialZoom: 14,
   minZoom: 11,
   maxZoom: 20,
-  maxBoundsPad: 0.10,
+  maxBoundsPad: 0.35,
   tileUrl: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
   tileAttribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
