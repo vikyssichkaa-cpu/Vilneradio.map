@@ -113,6 +113,11 @@ async function loadGeoJson(decisionsByAddress) {
       const paddedBounds = bounds.pad(MAP_CONFIG.maxBoundsPad);
       map.setMaxBounds(paddedBounds);
 
+      const currentZoom = map.getZoom();
+      if (MAP_CONFIG.initialZoom > currentZoom) {
+        map.setView(bounds.getCenter(), MAP_CONFIG.initialZoom);
+      }
+
       map.setMinZoom(MAP_CONFIG.minZoom);
     }
 
@@ -140,10 +145,20 @@ function onEachFeature(feature, layer, decisionsByAddress) {
   });
 }
 
+function getFeatureAddress(props) {
+  return (
+    props["Повна адреса"] ||
+    props["attr_Повна адреса"] ||
+    props["Адреса"] ||
+    [props["attr_Тип ВДМ"], props["attr_Вулиця"], props["attr_Номер будинку"]].filter(Boolean).join(" ") ||
+    ""
+  );
+}
+
 function buildPopupHtml(feature, decisionsByAddress) {
   const props = feature.properties || {};
 
-  const fullAddress = props["Повна адреса"] || [props["attr_Тип ВДМ"], props["attr_Вулиця"], props["attr_Номер будинку"]].filter(Boolean).join(" ");
+  const fullAddress = getFeatureAddress(props);
   const title = escapeHtml(fullAddress || props.attr_Title || `Object ${props.ID || ""}`.trim() || "Об’єкт");
   const description = props.attr_Text ? `<p class="popup__text">${escapeHtml(props.attr_Text)}</p>` : "";
 
@@ -173,7 +188,7 @@ function buildPopupHtml(feature, decisionsByAddress) {
 }
 
 function buildDecisionsHtml(props, decisionsByAddress) {
-  const address = props["Повна адреса"] || "";
+  const address = getFeatureAddress(props);
   const decisions = decisionsByAddress.get(normalizeAddress(address));
   if (!decisions || decisions.length === 0) {
     return `<p><strong>Рішення за адресою:</strong> не знайдено</p>`;

@@ -2,10 +2,10 @@ export const MAP_CONFIG = {
   geoJsonPath: "data/Data.geojson",
   decisionsCsvPath: "Проєкт - desicions.csv",
   initialCenter: [48.4611, 37.0858],
-  initialZoom: 10,
-  minZoom: 9,
+  initialZoom: 13,
+  minZoom: 10,
   maxZoom: 20,
-  maxBoundsPad: 0.28,
+  maxBoundsPad: 0.20,
   tileUrl: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
   tileAttribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
