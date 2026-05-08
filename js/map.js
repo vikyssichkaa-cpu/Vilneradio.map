@@ -4,8 +4,10 @@ const map = L.map("map", {
   zoomControl: true,
   minZoom: MAP_CONFIG.minZoom,
   maxZoom: MAP_CONFIG.maxZoom,
-  maxBoundsViscosity: 1,
+  maxBoundsViscosity: 0.5,
   worldCopyJump: false,
+  zoomAnimation: true,
+  fadeAnimation: true,
 });
 
 const statusEl = document.getElementById("status");
@@ -92,7 +94,7 @@ function parseDecisionsCsv(csvText) {
 }
 
 async function loadGeoJson(decisionsByAddress) {
-  setStatus("Loading map objects...");
+  setStatus("Завантаження об'єктів...");
 
   try {
     const response = await fetch(MAP_CONFIG.geoJsonPath, { cache: "no-store" });
@@ -102,27 +104,22 @@ async function loadGeoJson(decisionsByAddress) {
 
     const geoJson = await response.json();
     geoJsonLayer = L.geoJSON(geoJson, {
-      style: FEATURE_STYLE,
+      style: (feature) => getStyleByDecisions(feature, decisionsByAddress),
       onEachFeature: (feature, layer) => onEachFeature(feature, layer, decisionsByAddress),
     }).addTo(map);
 
     const bounds = geoJsonLayer.getBounds();
     if (bounds.isValid()) {
-      map.fitBounds(bounds, { padding: [20, 20] });
+      map.fitBounds(bounds, { padding: [30, 30], animate: true, duration: 0.8 });
 
       const paddedBounds = bounds.pad(MAP_CONFIG.maxBoundsPad);
       map.setMaxBounds(paddedBounds);
-
-      const currentZoom = map.getZoom();
-      if (MAP_CONFIG.initialZoom > currentZoom) {
-        map.setView(bounds.getCenter(), MAP_CONFIG.initialZoom);
-      }
 
       map.setMinZoom(MAP_CONFIG.minZoom);
     }
 
     const featureCount = Array.isArray(geoJson.features) ? geoJson.features.length : 0;
-    setStatus(`Loaded ${featureCount} objects`);
+    setStatus(`Завантажено ${featureCount} об'єктів`);
   } catch (error) {
     console.error(error);
     setStatus(`GeoJSON loading error. Check ${MAP_CONFIG.geoJsonPath}`, true);
@@ -130,7 +127,12 @@ async function loadGeoJson(decisionsByAddress) {
 }
 
 function onEachFeature(feature, layer, decisionsByAddress) {
-  layer.bindPopup(buildPopupHtml(feature, decisionsByAddress), { maxWidth: 360 });
+  layer.bindPopup(buildPopupHtml(feature, decisionsByAddress), { 
+    maxWidth: 380,
+    minWidth: 320,
+    className: "feature-popup",
+    closeButton: true,
+  });
 
   layer.on({
     mouseover(event) {
@@ -143,6 +145,47 @@ function onEachFeature(feature, layer, decisionsByAddress) {
       }
     },
   });
+}
+
+function getStyleByDecisions(feature, decisionsByAddress) {
+  const props = feature.properties || {};
+  const address = getFeatureAddress(props);
+  const decisions = decisionsByAddress.get(normalizeAddress(address)) || [];
+  const decisionCount = decisions.length;
+
+  let fillColor = "#fee5e5";
+  let fillOpacity = 0.35;
+
+  if (decisionCount === 0) {
+    fillColor = "#fee5e5";
+    fillOpacity = 0.25;
+  } else if (decisionCount === 1) {
+    fillColor = "#ffc9c9";
+    fillOpacity = 0.35;
+  } else if (decisionCount === 2) {
+    fillColor = "#ffaaaa";
+    fillOpacity = 0.4;
+  } else if (decisionCount === 3) {
+    fillColor = "#ff8888";
+    fillOpacity = 0.45;
+  } else if (decisionCount === 4) {
+    fillColor = "#ff6666";
+    fillOpacity = 0.5;
+  } else if (decisionCount <= 6) {
+    fillColor = "#ff4444";
+    fillOpacity = 0.55;
+  } else {
+    fillColor = "#dd0000";
+    fillOpacity = 0.6;
+  }
+
+  return {
+    color: "#2f6fab",
+    weight: 1.5,
+    opacity: 0.95,
+    fillColor: fillColor,
+    fillOpacity: fillOpacity,
+  };
 }
 
 function getFeatureAddress(props) {
@@ -182,10 +225,7 @@ function buildDecisionsHtml(props, decisionsByAddress) {
 
   const rows = decisions
     .map((item) => {
-      const isUrl = safeUrl(item.decision);
-      const decisionDisplay = isUrl
-        ? `<a href="${isUrl}" target="_blank" rel="noopener" class="popup__decision-link">📄 ${escapeHtml(item.decision)}</a>`
-        : `<span class="popup__decision-text">${escapeHtml(item.decision)}</span>`;
+      const decisionDisplay = formatDecisionLink(item.decision);
       return `<li class="popup__decision-item"><span class="popup__date">${escapeHtml(item.date || "—")}:</span> ${decisionDisplay}</li>`;
     })
     .join("");
@@ -196,6 +236,26 @@ function buildDecisionsHtml(props, decisionsByAddress) {
       <ul class="popup__decisions-list">${rows}</ul>
     </div>
   `;
+}
+
+function formatDecisionLink(rawDecision) {
+  if (!rawDecision) {
+    return `<span class="popup__decision-text">(невідоме)</span>`;
+  }
+
+  const trimmed = String(rawDecision).trim();
+  const isUrl = safeUrl(trimmed);
+
+  if (isUrl) {
+    return `<a href="${isUrl}" target="_blank" rel="noopener" class="popup__decision-link">📄 ${escapeHtml(trimmed)}</a>`;
+  }
+
+  if (trimmed.match(/^[a-f0-9]{32}\.pdf$/i)) {
+    const pdfUrl = `https://rada.info/upload/users_files/32897190/${trimmed}`;
+    return `<a href="${pdfUrl}" target="_blank" rel="noopener" class="popup__decision-link">📄 ${escapeHtml(trimmed)}</a>`;
+  }
+
+  return `<span class="popup__decision-text">${escapeHtml(trimmed)}</span>`;
 }
 
 function safeUrl(rawValue) {
