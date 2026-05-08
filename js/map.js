@@ -74,10 +74,15 @@ function parseDecisionsCsv(csvText) {
       continue;
     }
 
+    const dateValue = date?.trim() || "";
+    if (!dateValue) {
+      continue;
+    }
+
     const normalized = normalizeAddress(address);
     const record = {
       address: address.trim(),
-      date: date?.trim() || "",
+      date: dateValue,
       decision,
     };
 
@@ -206,9 +211,31 @@ function getFeatureAddress(props) {
   return props["Повна адреса"] || "";
 }
 
+function formatAddress(rawAddress) {
+  const value = String(rawAddress || "").replace(/\s+/g, " ").trim();
+  if (!value) {
+    return "";
+  }
+
+  if (value.includes(",")) {
+    return value;
+  }
+
+  const parts = value.split(" ");
+  if (parts.length >= 3) {
+    return `${parts[0]}, ${parts[1]}, ${parts.slice(2).join(" ")}`;
+  }
+
+  if (parts.length === 2) {
+    return `${parts[0]}, ${parts[1]}`;
+  }
+
+  return value;
+}
+
 function buildPopupHtml(feature, decisionsByAddress) {
   const props = feature.properties || {};
-  const fullAddress = getFeatureAddress(props);
+  const fullAddress = formatAddress(getFeatureAddress(props));
   
   if (!fullAddress) {
     return `<div class="popup"><p>Немає інформації про об’єкт</p></div>`;
