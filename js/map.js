@@ -153,35 +153,49 @@ function getStyleByDecisions(feature, decisionsByAddress) {
   const decisions = decisionsByAddress.get(normalizeAddress(address)) || [];
   const decisionCount = decisions.length;
 
-  let fillColor = "#fee5e5";
-  let fillOpacity = 0.35;
+  let fillColor = "#fdd7d7";
+  let fillOpacity = 0.30;
+  let strokeColor = "#f5a9a9";
+  let strokeWeight = 2;
 
   if (decisionCount === 0) {
-    fillColor = "#fee5e5";
-    fillOpacity = 0.25;
+    fillColor = "#fdd7d7";
+    fillOpacity = 0.30;
+    strokeColor = "#f5a9a9";
   } else if (decisionCount === 1) {
-    fillColor = "#ffc9c9";
-    fillOpacity = 0.35;
+    fillColor = "#ffb3b3";
+    fillOpacity = 0.40;
+    strokeColor = "#ff8080";
   } else if (decisionCount === 2) {
-    fillColor = "#ffaaaa";
-    fillOpacity = 0.4;
-  } else if (decisionCount === 3) {
-    fillColor = "#ff8888";
+    fillColor = "#ff9999";
     fillOpacity = 0.45;
+    strokeColor = "#ff6666";
+    strokeWeight = 2.1;
+  } else if (decisionCount === 3) {
+    fillColor = "#ff7777";
+    fillOpacity = 0.50;
+    strokeColor = "#ff4444";
+    strokeWeight = 2.2;
   } else if (decisionCount === 4) {
-    fillColor = "#ff6666";
-    fillOpacity = 0.5;
-  } else if (decisionCount <= 6) {
-    fillColor = "#ff4444";
+    fillColor = "#ff5555";
     fillOpacity = 0.55;
+    strokeColor = "#ff2222";
+    strokeWeight = 2.3;
+  } else if (decisionCount <= 6) {
+    fillColor = "#ff3333";
+    fillOpacity = 0.60;
+    strokeColor = "#dd0000";
+    strokeWeight = 2.3;
   } else {
     fillColor = "#dd0000";
-    fillOpacity = 0.6;
+    fillOpacity = 0.65;
+    strokeColor = "#aa0000";
+    strokeWeight = 2.4;
   }
 
   return {
-    color: "#2f6fab",
-    weight: 1.5,
+    color: strokeColor,
+    weight: strokeWeight,
     opacity: 0.95,
     fillColor: fillColor,
     fillOpacity: fillOpacity,
