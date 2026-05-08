@@ -143,16 +143,16 @@ function onEachFeature(feature, layer, decisionsByAddress) {
 function buildPopupHtml(feature, decisionsByAddress) {
   const props = feature.properties || {};
 
-  const title = escapeHtml(props.attr_Title || `Object ${props.ID || ""}`.trim() || "Object");
+  const fullAddress = props["Повна адреса"] || [props["attr_Тип ВДМ"], props["attr_Вулиця"], props["attr_Номер будинку"]].filter(Boolean).join(" ");
+  const title = escapeHtml(fullAddress || props.attr_Title || `Object ${props.ID || ""}`.trim() || "Об’єкт");
   const description = props.attr_Text ? `<p class="popup__text">${escapeHtml(props.attr_Text)}</p>` : "";
 
-  const addressParts = [props["attr_Тип ВДМ"], props["attr_Вулиця"], props["attr_Номер будинку"]].filter(Boolean);
-  const fullAddress = props["Повна адреса"] || (addressParts.length ? addressParts.join(" ") : "");
   const addressHtml = fullAddress
     ? `<p><strong>Адреса:</strong> ${escapeHtml(fullAddress)}</p>`
     : "";
 
   const typeHtml = props["attr_Вид"] ? `<p><strong>Type:</strong> ${escapeHtml(props["attr_Вид"])}</p>` : "";
+  const coordsHtml = props.Latitude && props.Longitude ? `<p><strong>Координати:</strong> ${escapeHtml(String(props.Latitude))}, ${escapeHtml(String(props.Longitude))}</p>` : "";
 
   const decisionHtml = buildDecisionsHtml(props, decisionsByAddress);
 
@@ -164,6 +164,7 @@ function buildPopupHtml(feature, decisionsByAddress) {
       <h3>${title}</h3>
       ${typeHtml}
       ${addressHtml}
+      ${coordsHtml}
       ${decisionHtml}
       ${description}
       ${sourceHtml}
@@ -175,7 +176,7 @@ function buildDecisionsHtml(props, decisionsByAddress) {
   const address = props["Повна адреса"] || "";
   const decisions = decisionsByAddress.get(normalizeAddress(address));
   if (!decisions || decisions.length === 0) {
-    return "";
+    return `<p><strong>Рішення за адресою:</strong> не знайдено</p>`;
   }
 
   const rows = decisions
