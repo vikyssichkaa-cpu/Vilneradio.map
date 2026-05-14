@@ -299,8 +299,8 @@ function formatDecisionLink(rawDecision, date, index) {
   const trimmed = String(rawDecision).trim();
   const isUrl = safeUrl(trimmed);
 
-  // Генеруємо читабельну назву замість технічного імені файлу
-  const readableName = `Рішення про релокацію від ${date || "невідомої дати"}`;
+  // Коротка назва рішення з датою
+  const readableName = `Рішення про компенсацію за знищене майно від ${date || "невідомої дати"}`;
   
   if (isUrl) {
     return `<a href="${isUrl}" target="_blank" rel="noopener" class="DocumentLink">📄 ${escapeHtml(readableName)}</a>`;
