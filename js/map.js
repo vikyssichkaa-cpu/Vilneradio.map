@@ -217,17 +217,43 @@ function formatAddress(rawAddress) {
     return "";
   }
 
+  const normalizeStreet = (streetParts) => {
+    const street = streetParts.join(" ");
+    return street.startsWith("вул.") || street.startsWith("вул")
+      ? street
+      : `вул. ${street}`;
+  };
+
   if (value.includes(",")) {
-    return value;
+    const parts = value.replace(/\s*,\s*/g, ", ").split(",").map((part) => part.trim()).filter(Boolean);
+    if (parts.length >= 3) {
+      const settlement = parts[1];
+      const street = normalizeStreet(parts.slice(2, -1));
+      const house = parts[parts.length - 1];
+      return `${settlement}, ${street}, ${house}`;
+    }
+    if (parts.length === 2) {
+      return `${parts[0]}, ${normalizeStreet([parts[1]])}`;
+    }
+    return parts.join(", ");
   }
 
   const parts = value.split(" ");
-  if (parts.length >= 3) {
-    return `${parts[0]}, ${parts[1]}, ${parts.slice(2).join(" ")}`;
+  if (parts.length >= 4) {
+    const settlement = parts[1];
+    const houseNumber = parts[parts.length - 1];
+    const streetParts = parts.slice(2, -1);
+    return `${settlement}, ${normalizeStreet(streetParts)}, ${houseNumber}`;
+  }
+
+  if (parts.length === 3) {
+    const settlement = parts[1];
+    const street = normalizeStreet([parts[2]]);
+    return `${settlement}, ${street}`;
   }
 
   if (parts.length === 2) {
-    return `${parts[0]}, ${parts[1]}`;
+    return `${parts[0]}, ${normalizeStreet([parts[1]])}`;
   }
 
   return value;
