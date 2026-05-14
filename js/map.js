@@ -262,16 +262,13 @@ function formatAddress(rawAddress) {
 function buildPopupHtml(feature, decisionsByAddress) {
   const props = feature.properties || {};
   const fullAddress = formatAddress(getFeatureAddress(props));
-  
-  if (!fullAddress) {
-    return `<div class="MapPopup"><p>Немає інформації про об’єкт</p></div>`;
-  }
+  const titleText = fullAddress || "Об’єкт без адреси";
   
   const decisionHtml = buildDecisionsHtml(props, decisionsByAddress);
   
   return `
     <div class="MapPopup">
-      <h3 class="MapPopup__title">🏢 ${escapeHtml(fullAddress)}</h3>
+      <h3 class="MapPopup__title">🏢 ${escapeHtml(titleText)}</h3>
       ${decisionHtml}
     </div>
   `;
