@@ -238,19 +238,14 @@ function buildPopupHtml(feature, decisionsByAddress) {
   const fullAddress = formatAddress(getFeatureAddress(props));
   
   if (!fullAddress) {
-    return `<div class="popup"><p>Немає інформації про об’єкт</p></div>`;
+    return `<div class="MapPopup"><p>Немає інформації про об’єкт</p></div>`;
   }
-  
-  const coordsHtml = props.Latitude && props.Longitude
-    ? `<p class="popup__coords"><strong>Координати:</strong> ${escapeHtml(String(props.Latitude).substring(0, 10))}, ${escapeHtml(String(props.Longitude).substring(0, 10))}</p>`
-    : "";
   
   const decisionHtml = buildDecisionsHtml(props, decisionsByAddress);
   
   return `
-    <div class="popup">
-      <h3 class="popup__title">🏢 ${escapeHtml(fullAddress)}</h3>
-      ${coordsHtml}
+    <div class="MapPopup">
+      <h3 class="MapPopup__title">🏢 ${escapeHtml(fullAddress)}</h3>
       ${decisionHtml}
     </div>
   `;
@@ -261,42 +256,62 @@ function buildDecisionsHtml(props, decisionsByAddress) {
   const decisions = decisionsByAddress.get(normalizeAddress(address));
   
   if (!decisions || decisions.length === 0) {
-    return `<div class="popup__decisions"><p class="popup__no-decisions"><strong>📋 Рішення:</strong> не знайдено</p></div>`;
+    return `<div class="DecisionList"><p class="DecisionList__no-decisions"><strong>📋 Рішення:</strong> не знайдено</p></div>`;
   }
 
-  const rows = decisions
-    .map((item) => {
-      const decisionDisplay = formatDecisionLink(item.decision);
-      return `<li class="popup__decision-item"><span class="popup__date">${escapeHtml(item.date || "—")}:</span> ${decisionDisplay}</li>`;
+  const showAll = decisions.length <= 3;
+  const visibleDecisions = showAll ? decisions : decisions.slice(0, 3);
+  
+  const rows = visibleDecisions
+    .map((item, index) => {
+      const decisionDisplay = formatDecisionLink(item.decision, item.date, index + 1);
+      return `<li class="DecisionItem">
+        <span class="DecisionItem__date">${escapeHtml(item.date || "—")}</span>
+        <span class="DecisionItem__link">${decisionDisplay}</span>
+      </li>`;
     })
     .join("");
 
+  const showMoreButton = !showAll ? `<button class="DecisionList__show-more" onclick="this.parentElement.classList.add('DecisionList--expanded')">Показати ще (${decisions.length - 3})</button>` : "";
+  
+  const allRows = showAll ? rows : rows + decisions.slice(3).map((item, index) => {
+    const decisionDisplay = formatDecisionLink(item.decision, item.date, index + 4);
+    return `<li class="DecisionItem DecisionItem--hidden">
+      <span class="DecisionItem__date">${escapeHtml(item.date || "—")}</span>
+      <span class="DecisionItem__link">${decisionDisplay}</span>
+    </li>`;
+  }).join("");
+
   return `
-    <div class="popup__decisions">
-      <p class="popup__decisions-title"><strong>📋 Рішення (${decisions.length}):</strong></p>
-      <ul class="popup__decisions-list">${rows}</ul>
+    <div class="DecisionList">
+      <p class="DecisionList__title"><strong>📋 Рішення (${decisions.length}):</strong></p>
+      <ul class="DecisionList__list">${allRows}</ul>
+      ${showMoreButton}
     </div>
   `;
 }
 
-function formatDecisionLink(rawDecision) {
+function formatDecisionLink(rawDecision, date, index) {
   if (!rawDecision) {
-    return `<span class="popup__decision-text">(невідоме)</span>`;
+    return `<span class="DocumentLink DocumentLink--text">(невідоме)</span>`;
   }
 
   const trimmed = String(rawDecision).trim();
   const isUrl = safeUrl(trimmed);
 
+  // Генеруємо читабельну назву замість технічного імені файлу
+  const readableName = `Рішення про релокацію від ${date || "невідомої дати"}`;
+  
   if (isUrl) {
-    return `<a href="${isUrl}" target="_blank" rel="noopener" class="popup__decision-link">📄 ${escapeHtml(trimmed)}</a>`;
+    return `<a href="${isUrl}" target="_blank" rel="noopener" class="DocumentLink">📄 ${escapeHtml(readableName)}</a>`;
   }
 
   if (trimmed.match(/^[a-f0-9]{32}\.pdf$/i)) {
     const pdfUrl = `https://rada.info/upload/users_files/32897190/${trimmed}`;
-    return `<a href="${pdfUrl}" target="_blank" rel="noopener" class="popup__decision-link">📄 ${escapeHtml(trimmed)}</a>`;
+    return `<a href="${pdfUrl}" target="_blank" rel="noopener" class="DocumentLink">📄 ${escapeHtml(readableName)}</a>`;
   }
 
-  return `<span class="popup__decision-text">${escapeHtml(trimmed)}</span>`;
+  return `<span class="DocumentLink DocumentLink--text">${escapeHtml(readableName)}</span>`;
 }
 
 function safeUrl(rawValue) {

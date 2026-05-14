@@ -76,8 +76,13 @@ body {
   padding: 8px !important;
 }
 
-.popup__title {
-  margin: 0 0 10px;
+.MapPopup {
+  max-width: 380px;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+}
+
+.MapPopup__title {
+  margin: 0 0 12px;
   font-size: 15px;
   font-weight: 600;
   line-height: 1.4;
@@ -85,103 +90,111 @@ body {
   word-break: break-word;
 }
 
-.popup__coords {
-  margin: 4px 0 8px !important;
-  padding: 6px 8px;
-  background: #f0f4f8;
-  border-radius: 4px;
-  font-size: 12px !important;
-  color: #4b5563;
-}
-
-.popup__coords strong {
-  color: #1f2937;
-  font-weight: 600;
-}
-
-.popup__decisions {
-  margin-top: 10px;
-  padding-top: 8px;
+.DecisionList {
+  margin-top: 12px;
+  padding-top: 10px;
   border-top: 1px solid #e5e7eb;
 }
 
-.popup__decisions-title {
-  margin: 0 0 6px !important;
+.DecisionList__title {
+  margin: 0 0 8px !important;
   font-size: 13px !important;
   font-weight: 600;
   color: #1f2937;
 }
 
-.popup__decisions-list {
-  margin: 4px 0 0 0;
-  padding: 0 0 0 18px;
+.DecisionList__list {
+  margin: 0;
+  padding: 0;
   list-style: none;
 }
 
-.popup__decision-item {
-  margin: 5px 0;
-  font-size: 12px;
-  line-height: 1.5;
-  color: #4b5563;
+.DecisionItem {
+  margin: 6px 0;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-radius: 6px;
+  border-left: 3px solid #3b82f6;
   display: flex;
+  flex-direction: column;
   gap: 4px;
-  flex-wrap: wrap;
 }
 
-.popup__date {
-  font-weight: 600;
-  color: #1f2937;
-  white-space: nowrap;
-  flex-shrink: 0;
+.DecisionItem--hidden {
+  display: none;
 }
 
-.popup__decision-link {
-  color: #0066cc;
+.DecisionList--expanded .DecisionItem--hidden {
+  display: flex;
+}
+
+.DecisionItem__date {
+  font-size: 11px;
+  font-weight: 500;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.DecisionItem__link {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.DocumentLink {
+  color: #2563eb;
   text-decoration: none;
-  word-break: break-all;
-  flex-grow: 1;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   transition: color 0.2s ease;
 }
 
-.popup__decision-link:hover {
-  color: #0052a3;
+.DocumentLink:hover {
+  color: #1d4ed8;
   text-decoration: underline;
 }
 
-.popup__decision-link:active {
-  color: #003d7a;
+.DocumentLink:active {
+  color: #1e40af;
 }
 
-.popup__decision-text {
+.DocumentLink--text {
   color: #4b5563;
-  word-break: break-word;
-  flex-grow: 1;
+  font-weight: normal;
 }
 
-.popup__no-decisions {
+.DecisionList__no-decisions {
   margin: 0 !important;
   font-size: 12px !important;
   color: #6b7280;
   font-style: italic;
+  padding: 8px 10px;
+  background: #f8fafc;
+  border-radius: 6px;
 }
 
-.popup p {
-  margin: 6px 0;
-  font-size: 13px;
-  line-height: 1.35;
+.DecisionList__show-more {
+  margin-top: 8px;
+  padding: 6px 12px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  width: 100%;
 }
 
-.popup__text {
-  max-height: 110px;
-  overflow: auto;
+.DecisionList__show-more:hover {
+  background: #e2e8f0;
 }
 
-.popup a {
-  color: #0066cc;
-}
-
-.popup a:hover {
-  color: #0052a3;
+.DecisionList__show-more:active {
+  background: #cbd5e1;
 }
 
 @media (max-width: 768px) {
@@ -191,5 +204,40 @@ body {
 
   .app__header h1 {
     font-size: 16px;
+  }
+
+  .MapPopup {
+    max-width: 320px;
+  }
+
+  .feature-popup .leaflet-popup-content {
+    padding: 6px !important;
+  }
+
+  .MapPopup__title {
+    font-size: 14px;
+    margin-bottom: 10px;
+  }
+
+  .DecisionItem {
+    padding: 6px 8px;
+    margin: 4px 0;
+  }
+
+  .DecisionItem__date {
+    font-size: 10px;
+  }
+
+  .DecisionItem__link {
+    font-size: 12px;
+  }
+
+  .DocumentLink {
+    gap: 4px;
+  }
+
+  .DecisionList__show-more {
+    padding: 5px 10px;
+    font-size: 11px;
   }
 }
