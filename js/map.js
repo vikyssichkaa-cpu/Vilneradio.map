@@ -22,14 +22,6 @@ L.tileLayer(MAP_CONFIG.tileUrl, {
 L.control.scale({ imperial: false }).addTo(map);
 map.setView(MAP_CONFIG.initialCenter, MAP_CONFIG.initialZoom);
 
-window.addEventListener("load", () => {
-  setTimeout(() => {
-    if (map && map.invalidateSize) {
-      map.invalidateSize(true);
-    }
-  }, 250);
-});
-
 initMap();
 
 async function initMap() {
@@ -129,11 +121,6 @@ async function loadGeoJson(decisionsByAddress) {
       map.setMaxBounds(paddedBounds);
 
       map.setMinZoom(MAP_CONFIG.minZoom);
-      setTimeout(() => {
-        if (map && map.invalidateSize) {
-          map.invalidateSize(true);
-        }
-      }, 300);
     }
 
     const featureCount = Array.isArray(geoJson.features) ? geoJson.features.length : 0;
