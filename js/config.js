@@ -6,7 +6,7 @@ export const MAP_CONFIG = {
   minZoom: 11,
   maxZoom: 20,
   maxBoundsPad: 0.35,
-  tileUrl: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
+  tileUrl: "https://tiles.cestra.com.ua/v1/styles/positron-uk/{z}/{x}/{y}{r}.webp?key=pk-tiles-phoEPNVLxAcySVEmuNXPFgCDUr08aYlk",
   tileAttribution:
     '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
 };
